@@ -1,0 +1,10 @@
+# LIST YOUR APT PACKAGES HERE
+
+#for webserver
+ros-kinetic-rosbridge-server
+
+#For pid
+python-serial
+
+#For state estimator
+python-serial
