@@ -33,6 +33,12 @@ modepub = rospy.Publisher('desired/mode', Mode, queue_size=1)
 #togglepub = rospy.Publisher('toggle_transform', Empty, queue_size=1)
 #rospy.set_param('joy/autorepeat_rate', 20)
 
+roll = 1500
+pitch = 1500
+yaw = 1500
+throttle = 1000
+
+
 def joy_callback(data):
     global scalar
     global modepub
@@ -43,9 +49,17 @@ def joy_callback(data):
     global z_total_steps
     global positionMsg
     global twistMsg
+    global roll
+    global pitch
+    global yaw
+    global throttle
     cmdpub = rospy.Publisher('fly_commands', RC, queue_size=1)
 
 
+    roll_factor = 100
+    yaw_factor = 100
+    pitch_factor = 100
+    throttle_factor = 800
     def publishResetTransform():
         resetpub.publish(Empty())
     
@@ -80,7 +94,7 @@ def joy_callback(data):
     
     print "callback"
 
-    if data.buttons[1] == 1:
+    if data.buttons[0] == 1:
         print "button", 1
         print "publishArm()"
         publishArm()
@@ -97,40 +111,39 @@ def joy_callback(data):
 
  
     print data.axes
-    if np.abs(data.axes[0]) >= 0.3:
+    print data.buttons
+    dead_zone = 0.1
+    if np.abs(data.axes[0]) >= dead_zone:
         print "Axes 0"
         value = data.axes[0]
-        if data.axes[0] > 0:
-            roll = 1500 + data.axes[0]*roll_factor
+        roll = 1500 + data.axes[0]*roll_factor
     else:
         roll = 1500
             
         
-    if np.abs(data.axes[1]) >= 0.3:
+    if np.abs(data.axes[1]) >= dead_zone:
         print "Axes 1"
         value = data.axes[1]
-        if data.axes[1] > 0:
-            pitch = 1500 + data.axes[1]*pitch_factor
+        pitch = 1500 + data.axes[1]*pitch_factor
     else:
         pitch = 1500
 
-    if np.abs(data.axes[3]) >= 0.3:
+    if np.abs(data.axes[3]) >= dead_zone:
         print "Axes 2"
         value = data.axes[3]
-        if data.axes[3] > 0:
-            throttle = 1000 + data.axes[3]*throttle_factor
+        throttle = 1000 + data.axes[3]*throttle_factor
     else:
         throttle = 1000
 
-    if np.abs(data.axes[4]) >= 0.3:
+    if np.abs(data.axes[2]) >= dead_zone:
         print "Axes 3"
-        value = data.axes[4]
-        if data.axes[3] > 0:
-            yaw = 1500 + data.axes[3]*yaw_factor
+        value = data.axes[2]
+        
+        yaw = 1500 -  data.axes[2]*yaw_factor
     else:
         yaw = 1500
 
-    publish_cmd([roll, pitch, yaw, throttle])
+    publish_cmd([int(roll), int(pitch), int(yaw), int(throttle)])
 
 
 
