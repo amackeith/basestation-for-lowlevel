@@ -112,7 +112,7 @@ def joy_callback(data):
  
     print data.axes
     print data.buttons
-    dead_zone = 0.1
+    dead_zone = 0.05
     if np.abs(data.axes[0]) >= dead_zone:
         print "Axes 0"
         value = data.axes[0]
