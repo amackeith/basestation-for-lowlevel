@@ -37,49 +37,13 @@ roll = 1500
 pitch = 1500
 yaw = 1500
 throttle = 1000
+cmdpub = rospy.Publisher('/duckiedrone/fly_commands', RC, queue_size=1)
 
 
-def joy_callback(data):
-    global scalar
-    global modepub
-    global modeMsg
-    global resetpub
-    global z_counter
-    global z_step
-    global z_total_steps
-    global positionMsg
-    global twistMsg
-    global roll
-    global pitch
-    global yaw
-    global throttle
-    cmdpub = rospy.Publisher('fly_commands', RC, queue_size=1)
 
 
-    roll_factor = 100
-    yaw_factor = 100
-    pitch_factor = 100
-    throttle_factor = 800
-    def publishResetTransform():
-        resetpub.publish(Empty())
-    
 
-    def publishArm():
-
-        if modeMsg.mode == "DISARMED":
-            modeMsg.mode = "ARMED"
-            modepub.publish(modeMsg)
-
-    def publishDisarm():
-        
-        modeMsg.mode = "DISARMED"
-        modepub.publish(modeMsg)
-
-    def publishTakeoff():
-
-        modeMsg.mode = "FLYING"
-        modepub.publish(modeMsg)
-
+def cmd_prompt(rpyt):
     def publish_cmd(cmd):
         """Publish the controls to /pidrone/fly_commands """
         msg = RC()
@@ -91,71 +55,22 @@ def joy_callback(data):
         cmdpub.publish(msg)
 
 
+
+    try:
+
+        r, p, y, t = rpyt.split()
+        publish_cmd([int(r), int(p), int(y), int(t)])
+    except:
+        publish_cmd([1000, 1000, 1000,1000])
     
-    print "callback"
-
-    if data.buttons[0] == 1:
-        print "button", 1
-        print "publishArm()"
-        publishArm()
-
-    if data.buttons[2] == 1:
-        print "button", 2
-        print "publishDisarm()"
-        publishDisarm()
-
-    if data.buttons[3] == 1:
-        print "button", 3
-        print "publishTakeoff()"
-        publishTakeoff()
-
- 
-    print data.axes
-    print data.buttons
-    dead_zone = 0.05
-    if np.abs(data.axes[0]) >= dead_zone:
-        print "Axes 0"
-        value = data.axes[0]
-        roll = 1500 + data.axes[0]*roll_factor
-    else:
-        roll = 1500
-            
-        
-    if np.abs(data.axes[1]) >= dead_zone:
-        print "Axes 1"
-        value = data.axes[1]
-        pitch = 1500 + data.axes[1]*pitch_factor
-    else:
-        pitch = 1500
-
-    if np.abs(data.axes[3]) >= dead_zone:
-        print "Axes 2"
-        value = data.axes[3]
-        throttle = 1000 + data.axes[3]*throttle_factor
-    else:
-        throttle = 1000
-
-    if np.abs(data.axes[2]) >= dead_zone:
-        print "Axes 3"
-        value = data.axes[2]
-        
-        yaw = 1500 -  data.axes[2]*yaw_factor
-    else:
-        yaw = 1500
-
-    publish_cmd([int(roll), int(pitch), int(yaw), int(throttle)])
-
-
-
-
-
 
 def main():
     node_name = os.path.splitext(os.path.basename(__file__))[0]
     rospy.init_node(node_name)
-    rospy.Subscriber("/joy", Joy, joy_callback)
-    rospy.spin()
-    
-    
-if __name__ == "__main__":
-    main()
+    while not rospy.is_shutdown():
+        print "RPYT"
+        
+        rpyt = raw_input()
+        cmd_prompt(rpyt)
+
+main()

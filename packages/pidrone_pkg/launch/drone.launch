@@ -11,12 +11,12 @@
 
   <!-- Joy Stick Nodes -->
   
-  <node pkg="pidrone_pkg" type="drone_joy_translator.py" name="drone_joy_translator" output="screen"></node>
+  <!-- node pkg="pidrone_pkg" type="drone_joy_translator.py" name="drone_joy_translator" output="screen" -->
   
   <node pkg="pidrone_pkg" type="heartbeat_publisher_NEVER_RUN_ON_DRONE.py" name="heartbeat_publisher_NEVER_RUN_ON_DRONE" output="screen">
-  </node>
-  
+  </node> 
 
   </group>
+    <include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"></include>
 </launch>
 
